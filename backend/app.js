@@ -9,12 +9,14 @@ const userRoutes = require('./routes/user');
 const app = express();
 
 mongoose.connect('mongodb+srv://pyk:1L19pY2S5BwlCxVJ@cluster0.cepmx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
-  { useNewUrlParser: true,
-    useUnifiedTopology: true })
-  .then(() => console.log('Connexion à MongoDB réussie'))
-  .catch(() => console.log('Connexion à MongoDB échouée'));
+  {useNewUrlParser: true, useUnifiedTopology: true},
+  (err)=>{
+    if(!err) console.log ('Connexion à MongoDB réussie');
+    else console.log ('Connexion à MongoDB échouée');
+  }
+);
 
-//get body of request
+//get content-type: 'json' request
 app.use(express.json());
 
 //app can access to API

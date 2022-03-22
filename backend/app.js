@@ -1,9 +1,11 @@
 //import express
 const express = require('express');
 const mongoose = require('mongoose');
+const path = require('path');
 
 //import routes
 const userRoutes = require('./routes/user');
+const sauceRoutes = require('./routes/sauce');
 
 //create express app
 const app = express();
@@ -30,8 +32,11 @@ app.use((req, res, next)=>{
     next();
   });
 
+  
+app.use('/images', express.static(path.join(__dirname, 'images')));
 //save routes
 app.use('/api/auth', userRoutes);
+app.use('/api/sauces', sauceRoutes);
 
 //give access to app on each files
 module.exports = app;

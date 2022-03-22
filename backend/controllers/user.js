@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const jsonToken = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 
@@ -15,7 +15,7 @@ const createUser = (req,res) =>{
         user.save((error,docs)=>{
             if(!error) res.status(201).json({message:'Utilisateur créé'})
             else error => res.status(500).json({error})
-        })
+        });
     })
     .catch(error => res.status(500).json({error}))
 };
@@ -29,13 +29,6 @@ const logUser = (req,res) =>{
             //if user doesn't exist
             return res.status(401).json({error: 'Utilisateur non trouvé'})
         }
-        const tokenVar = jsonToken.sign(
-            //avoid modifications of others user ID
-            {userId: user._id},
-            'TOKEN_LOGIN',
-            {expiresIn: '12h'}
-        )
-        console.log(tokenVar);
         //if user exist, compare password
         bcrypt.compare(req.body.password, user.password)
             .then(validPassword =>{
@@ -46,10 +39,10 @@ const logUser = (req,res) =>{
                 //if password valid, user is logged
                 res.status(200).json({
                     userId: user._id,
-                    token: jsonToken.sign(
+                    token: jwt.sign(
                         //avoid modifications of others user ID
                         {userId: user._id},
-                        'TOKEN_LOGIN',
+                        'TOKEN_VERY_SECRET',
                         {expiresIn: '12h'}
                     )
                 });

@@ -8,13 +8,13 @@ const MIME_TYPES = {
 //defines where and how save the files
 const storage = multer.diskStorage({
     //where files are saved
-    destination:(callback)=>{
+    destination:(req,file,callback)=>{
         //(no error, folder)
-        callback(null,'images')
+        callback(null,'images');
     },
-    filename: (file,callback) =>{
-        //add _  instead of spaces
-        const name = file.originalname.split('').join('_');
+    filename: (req,file,callback) =>{
+        //add underscores instead of spaces
+        const name = file.originalname.split(' ').join('_');
         const extension = MIME_TYPES[file.mimetype];
         callback(null, name + Date.now() + '.' + extension);
     }

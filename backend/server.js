@@ -1,14 +1,14 @@
 //import http package
-const http = require('http');
+const http = require("http");
 //import app.js
-const app = require('./app')
+const app = require("./app");
 
-const dotenv = require('dotenv');
+const dotenv = require("dotenv");
 dotenv.config();
 const MY_PORT = process.env.PORT;
 const MY_APP_SECRET = process.env.APP_SECRET;
 
-const normalizePort = val => {
+const normalizePort = (val) => {
   const port = parseInt(val, 10);
 
   if (isNaN(port)) {
@@ -21,22 +21,23 @@ const normalizePort = val => {
 };
 
 //defines on which port app works
-const port = normalizePort(MY_PORT || '3000');
-app.set('port', port);
+const port = normalizePort(MY_PORT || "3000");
+app.set("port", port);
 
-const errorHandler = error => {
-  if (error.syscall !== 'listen') {
+const errorHandler = (error) => {
+  if (error.syscall !== "listen") {
     throw error;
   }
   const address = server.address();
-  const bind = typeof address === 'string' ? 'pipe ' + address : 'port: ' + port;
+  const bind =
+    typeof address === "string" ? "pipe " + address : "port: " + port;
   switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges.');
+    case "EACCES":
+      console.error(bind + " requires elevated privileges.");
       process.exit(1);
       break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use.');
+    case "EADDRINUSE":
+      console.error(bind + " is already in use.");
       process.exit(1);
       break;
     default:
@@ -46,11 +47,11 @@ const errorHandler = error => {
 
 const server = http.createServer(app);
 
-server.on('error', errorHandler);
-server.on('listening', () => {
+server.on("error", errorHandler);
+server.on("listening", () => {
   const address = server.address();
-  const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
-  console.log('Listening on ' + bind);
+  const bind = typeof address === "string" ? "pipe " + address : "port " + port;
+  console.log("Listening on " + bind);
 });
 
 server.listen(port);

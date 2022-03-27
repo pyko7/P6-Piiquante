@@ -3,6 +3,12 @@ const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
 
+//import env variables
+const dotenv = require("dotenv");
+dotenv.config();
+const MY_APP_LOG = process.env.APP_LOG;
+const MY_APP_PASSWORD = process.env.APP_PASSWORD;
+
 //import routes
 const userRoutes = require("./routes/user");
 const sauceRoutes = require("./routes/sauce");
@@ -11,7 +17,7 @@ const sauceRoutes = require("./routes/sauce");
 const app = express();
 
 mongoose.connect(
-  "mongodb+srv://pyk:1L19pY2S5BwlCxVJ@cluster0.cepmx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+  `mongodb+srv://${MY_APP_LOG}:${MY_APP_PASSWORD}@cluster0.cepmx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
   { useNewUrlParser: true, useUnifiedTopology: true },
   (err) => {
     if (!err) console.log("Connexion à MongoDB réussie");

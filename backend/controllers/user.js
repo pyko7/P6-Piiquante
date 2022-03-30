@@ -2,12 +2,19 @@ const dotenv = require("dotenv");
 dotenv.config();
 const USER_LOGIN_TOKEN = process.env.USER_TOKEN_LOGIN;
 
+const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 //creation of new user
 const createUser = (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(401).json({
+      errors: "Veuillez vérifier vos champs de texte",
+    });
+  }
   bcrypt
     .hash(req.body.password, 10)
     .then((hash) => {
@@ -18,10 +25,16 @@ const createUser = (req, res) => {
       //save user to database
       user.save((error, docs) => {
         if (!error) res.status(201).json({ message: "Utilisateur créé" });
-        else (error) => res.status(500).json({ error });
+        else (error) => res.status(500).json({ error: "test ici" });
       });
     })
-    .catch((error) => res.status(500).json({ error }));
+    .catch((error) =>
+      res.status(500).json({
+        //if user tries to sign up with empty inputs
+        error:
+          "Une erreur est survenue lors de la tentative de connexion, veuillez réessayer",
+      })
+    );
 };
 
 const logUser = (req, res) => {
@@ -51,9 +64,15 @@ const logUser = (req, res) => {
             ),
           });
         })
-        .catch((error) => res.status(500).json({ error }));
+        .catch((error) =>
+          res.status(500).json({
+            //if user tries to login without password
+            error:
+              "Une erreur est survenue lors de la tentative de connexion, veuillez réessayer",
+          })
+        );
     })
-    .catch((error) => res.status(500).json({ error }));
+    .catch((error) => res.status(500).json({ error: "erreur là" }));
 };
 
 module.exports = {

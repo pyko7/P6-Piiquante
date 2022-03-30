@@ -1,4 +1,5 @@
 const multer = require("multer");
+const path = require("path");
 const MIME_TYPES = {
   "image/jpg": "jpg",
   "image/jpeg": "jpg",
@@ -20,5 +21,21 @@ const storage = multer.diskStorage({
   },
 });
 
+//file size limit
+const limits = {
+  files: 1,
+  fileSize: 2097152, //2mb limit
+};
+
+const fileFilter = (req, file, callback) => {
+  const extension = path.extname(file.originalname);
+  if (extension !== ".png" && extension !== ".jpg" && extension !== ".jpeg") {
+    return callback(
+      new Error("Seules les images aux formats PNG, JPG et JPEG sont acceptées")
+    );
+  }
+  callback(null, true);
+};
+
 //exports single image
-module.exports = multer({ storage }).single("image");
+module.exports = multer({ storage, limits, fileFilter }).single("image");

@@ -24,8 +24,6 @@ const addSauce = (req, res, next) => {
       validInput = false;
     }
   }
-  console.log(sauceObject);
-  console.log(req.file.path);
 
   if (validInput) {
     //if every input is valid, the sauce is created
@@ -43,7 +41,8 @@ const addSauce = (req, res, next) => {
       .then(() => res.status(201).json({ message: "Nouvelle sauce créée" }))
       .catch((err) => res.status(400).json({ err }));
   } else {
-    fs.unlink("images", (err) => console.log(err));
+    //delete image if the form is not valid
+    fs.unlink(path.join(`${req.file.path}`), (err) => console.log(err));
     return res.status(400).json({
       error:
         "Nous n'avons pas pu créer votre sauce, veuillez vérifier la validité de vos champs",

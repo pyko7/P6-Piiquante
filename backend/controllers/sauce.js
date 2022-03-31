@@ -1,26 +1,54 @@
 const Sauce = require("../models/Sauce");
-const expressValidator = require("express-validator");
+const validator = require("validator");
+const path = require("path");
 const fs = require("fs");
 
 //function add a sauce
 const addSauce = (req, res, next) => {
+  let validInput = true;
   const sauceObject = JSON.parse(req.body.sauce);
+  const sauceArray = Object.values(sauceObject);
   //delete front ID, DB creates a new ID
   delete sauceObject._id;
-  const sauce = new Sauce({
-    //get every input data
-    ...sauceObject,
-    //image url = http + localhost + images folder + image name
-    imageUrl: `${req.protocol}://${req.get("host")}/images/${
-      req.file.filename
-    }`,
-  });
-  console.log(req.file);
-  //save new sauce to DB
-  sauce
-    .save()
-    .then(() => res.status(201).json({ message: "Nouvelle sauce créée" }))
-    .catch((err) => res.status(400).json({ err }));
+
+  //loop checks if inputs are valid before creating the sauce
+  for (value in sauceArray) {
+    if (
+      validator.isEmpty(sauceArray[value].toString(), {
+        ignore_whitespace: true,
+      }) ||
+      validator.contains(sauceArray[value].toString(), "$") ||
+      validator.contains(sauceArray[value].toString(), "=")
+    ) {
+      // console.log("Vérifer le champ: " + sauceArray[value]);
+      validInput = false;
+    }
+  }
+  console.log(sauceObject);
+  console.log(req.file.path);
+
+  if (validInput) {
+    //if every input is valid, the sauce is created
+    const sauce = new Sauce({
+      //get every input data
+      ...sauceObject,
+      //image url = http + localhost + images folder + image name
+      imageUrl: `${req.protocol}://${req.get("host")}/images/${
+        req.file.filename
+      }`,
+    });
+    //save new sauce to DB
+    sauce
+      .save()
+      .then(() => res.status(201).json({ message: "Nouvelle sauce créée" }))
+      .catch((err) => res.status(400).json({ err }));
+  } else {
+    fs.unlink("images", (err) => console.log(err));
+    return res.status(400).json({
+      error:
+        "Nous n'avons pas pu créer votre sauce, veuillez vérifier la validité de vos champs",
+    });
+  }
 };
 
 //function displays all sauces
@@ -39,7 +67,6 @@ const getOneSauce = (req, res, next) => {
 
 //function modifies one sauce
 const modifySauce = (req, res, next) => {
-  const inputCheck = true;
   //delete previous image if a new image is uploaded
   if (req.file) {
     Sauce.findOne({ _id: req.params.id })

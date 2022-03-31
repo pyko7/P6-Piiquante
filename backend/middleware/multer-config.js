@@ -30,6 +30,7 @@ const limits = {
 const fileFilter = (req, file, callback) => {
   const extension = path.extname(file.originalname);
   if (extension !== ".png" && extension !== ".jpg" && extension !== ".jpeg") {
+    //using callback error because this is not an exception
     return callback(
       new Error("Seules les images aux formats PNG, JPG et JPEG sont acceptées")
     );

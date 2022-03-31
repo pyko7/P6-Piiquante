@@ -2,22 +2,16 @@ const dotenv = require("dotenv");
 dotenv.config();
 const USER_LOGIN_TOKEN = process.env.USER_TOKEN_LOGIN;
 
-const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const validator = require("validator");
 
 //creation of new user
 const createUser = (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(401).json({
-      errors: "Veuillez vérifier vos champs de texte",
-    });
-  }
-  bcrypt
-    .hash(req.body.password, 10)
-    .then((hash) => {
+  //verify if user add a valid email
+  if (validator.isEmail(req.body.email, { blacklisted_chars: '$="' })) {
+    bcrypt.hash(req.body.password, 10).then((hash) => {
       const user = new User({
         email: req.body.email,
         password: hash,
@@ -25,16 +19,15 @@ const createUser = (req, res) => {
       //save user to database
       user.save((error, docs) => {
         if (!error) res.status(201).json({ message: "Utilisateur créé" });
-        else (error) => res.status(500).json({ error: "test ici" });
+        else (error) => res.status(500).json({ error });
       });
-    })
-    .catch((error) =>
-      res.status(500).json({
-        //if user tries to sign up with empty inputs
-        error:
-          "Une erreur est survenue lors de la tentative de connexion, veuillez réessayer",
-      })
-    );
+    });
+  } else {
+    res.status(400).json({
+      error:
+        "Veuillez saisir une adresse email ainsi qu'un mot de passe valide",
+    });
+  }
 };
 
 const logUser = (req, res) => {
@@ -72,7 +65,7 @@ const logUser = (req, res) => {
           })
         );
     })
-    .catch((error) => res.status(500).json({ error: "erreur là" }));
+    .catch((error) => res.status(500).json({ error }));
 };
 
 module.exports = {

@@ -8,6 +8,5 @@ const userSchema = mongoose.Schema({
 
 //check email authenticity
 userSchema.plugin(uniqueValidator);
-
 //export as model
 module.exports = mongoose.model("User", userSchema);

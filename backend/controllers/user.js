@@ -9,18 +9,25 @@ const validator = require("validator");
 
 //creation of new user
 const createUser = (req, res) => {
-  //verify if user add a valid email
-  if (validator.isEmail(req.body.email, { blacklisted_chars: '$="' })) {
-    bcrypt.hash(req.body.password, 10).then((hash) => {
+  //verify if the email is valid and the password input is not empty
+  if (
+    validator.isEmail(req.body.email, { blacklisted_chars: '$="' }) &&
+    !validator.isEmpty(req.body.password, {
+      ignore_whitespace: true,
+    })
+  ) {
+    bcrypt.hash(req.body.password, 10, async (err, hash) => {
       const user = new User({
         email: req.body.email,
         password: hash,
       });
       //save user to database
-      user.save((error, docs) => {
-        if (!error) res.status(201).json({ message: "Utilisateur créé" });
-        else (error) => res.status(500).json({ error });
-      });
+      await user
+        .save()
+        .then(() => res.status(201).json({ message: "Utilisateur créé !" }))
+        .catch(() =>
+          res.status(400).json({ message: "L'adresse email est déjà utilisée" })
+        );
     });
   } else {
     res.status(400).json({

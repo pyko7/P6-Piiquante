@@ -18,7 +18,7 @@ On Piiquante you can add you favorite hot sauces.
 ### Prerequisite
 
 1) Install [NodeJS](https://nodejs.org/en/)
-2) Install [MongoDB] (https://www.mongodb.com/try/download/community)
+2) Install [MongoDB](https://www.mongodb.com/try/download/community)
 3) Run `npm install` at the root of the directory
 4) Run `node server`
 

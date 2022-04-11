@@ -19,8 +19,8 @@ On Piiquante you can add you favorite hot sauces.
 
 1) Install [NodeJS](https://nodejs.org/en/)
 2) Install [MongoDB] (https://www.mongodb.com/try/download/community)
-3) Run <npm install> at the root of the directory
-4) Run <node server>
+3) Run `npm install` at the root of the directory
+4) Run `node server`
 
 ### The project
 
@@ -37,14 +37,14 @@ For this project, the objective is to build the back of the web app. Users shoul
 
 Dependencies:
 
--mongoose
--mongoose-unique-validator
--bcrypt
--dotenv
--jwt
--multer
--nodemon
--validator
+-mongoose  
+-mongoose-unique-validator  
+-bcrypt  
+-dotenv  
+-jwt  
+-multer  
+-nodemon  
+-validator  
 
 
 

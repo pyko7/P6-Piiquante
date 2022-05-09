@@ -2,8 +2,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
+const helmet = require("helmet");
 
-//import env variables
+//configures env variables
 const dotenv = require("dotenv");
 dotenv.config();
 const MY_APP_LOG = process.env.APP_LOG;
@@ -15,9 +16,14 @@ const sauceRoutes = require("./routes/sauce");
 
 //create express app
 const app = express();
+//get content-type: 'json' request
+app.use(express.json());
+//protect app from some well-known web vulnerabilities by setting HTTP headers appropriately
+app.use(helmet());
 
+//the values of MY_APP_LOG and MY_APP_PASSWORD are availables in the .env file
 mongoose.connect(
-  `mongodb+srv://${MY_APP_LOG}:${MY_APP_PASSWORD}@cluster0.cepmx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
+  `mongodb+srv://${MY_APP_LOG}:${MY_APP_PASSWORD}@cluster0.pz8fb.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
   { useNewUrlParser: true, useUnifiedTopology: true },
   (err) => {
     if (!err) console.log("Connexion à MongoDB réussie");
@@ -25,23 +31,16 @@ mongoose.connect(
   }
 );
 
-//get content-type: 'json' request
-app.use(express.json());
-
-//app can access to API
+//app can access to API - avoid CORS errors
 app.use((req, res, next) => {
   //adding of header - everybody can access to API
   res.setHeader("Access-Control-Allow-Origin", "*");
   //adding of header - can use these headers
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
-  );
+  res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization");
   //adding of header - can use these methods
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-  );
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  //adding of header - requests from any origin can read the resource
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   next();
 });
 

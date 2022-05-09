@@ -27,6 +27,7 @@ const limits = {
   fileSize: 2097152, //2mb limit
 };
 
+//check the file extension, if it doesn't fit it sends an error
 const fileFilter = (req, file, callback) => {
   const extension = path.extname(file.originalname);
   if (extension !== ".png" && extension !== ".jpg" && extension !== ".jpeg") {

@@ -3,6 +3,7 @@ const validator = require("validator");
 const path = require("path");
 const fs = require("fs");
 
+
 //function add a sauce
 const addSauce = (req, res, next) => {
   let validInput = true;
@@ -11,7 +12,11 @@ const addSauce = (req, res, next) => {
   //delete front ID, DB creates a new ID
   delete sauceObject._id;
 
-  //loop checks if inputs are valid before creating the sauce
+  /**
+   *  loop checks if inputs are valid before creating the sauce
+   *  you'll have to comment this loop if you want to test this function on postman otherwise
+   *  it will return you an error because of the empty fields
+   */
   for (value in sauceArray) {
     if (
       validator.isEmpty(sauceArray[value].toString(), {
@@ -20,35 +25,38 @@ const addSauce = (req, res, next) => {
       validator.contains(sauceArray[value].toString(), "$") ||
       validator.contains(sauceArray[value].toString(), "=")
     ) {
-      // console.log("Vérifer le champ: " + sauceArray[value]);
+      console.log("Vérifer le champ: " + sauceArray[value]);
       validInput = false;
     }
   }
 
-  if (validInput) {
+  if(!validInput){
+    //delete image if the form is not valid
+    fs.unlink(path.join(`${req.file.path}`), (err) => console.log(err));
+    res.status(400).json({
+      error:
+        "Nous n'avons pas pu créer votre sauce, veuillez vérifier la validité de vos champs",
+    });
+    return
+  }
+
     //if every input is valid, the sauce is created
     const sauce = new Sauce({
       //get every input data
       ...sauceObject,
-      //image url = http + localhost + images folder + image name
+      //image url = http + localhost + images folder + image name + filename
       imageUrl: `${req.protocol}://${req.get("host")}/images/${
         req.file.filename
       }`,
     });
     //save new sauce to DB
-    sauce
+    return sauce
       .save()
       .then(() => res.status(201).json({ message: "Nouvelle sauce créée" }))
       .catch((err) => res.status(400).json({ err }));
-  } else {
-    //delete image if the form is not valid
-    fs.unlink(path.join(`${req.file.path}`), (err) => console.log(err));
-    return res.status(400).json({
-      error:
-        "Nous n'avons pas pu créer votre sauce, veuillez vérifier la validité de vos champs",
-    });
-  }
+
 };
+
 
 //function displays all sauces
 const getSauce = (req, res, next) => {
@@ -58,25 +66,16 @@ const getSauce = (req, res, next) => {
 };
 
 //function displays one sauce
-const getOneSauce = (req, res, next) => {
+const getSauceById = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
     .then((sauce) => res.status(200).json(sauce))
     .catch((err) => res.status(400).json({ err }));
 };
 
 //function modifies one sauce
-const modifySauce = (req, res, next) => {
-  //delete previous image if a new image is uploaded
-  if (req.file) {
-    Sauce.findOne({ _id: req.params.id })
-      .then((sauce) => {
-        const filename = sauce.imageUrl.split("/images/")[1];
-        fs.unlink(`images/${filename}`, (err) => {
-          if (err) throw err;
-        });
-      })
-      .catch((error) => res.status(400).json({ error }));
-  }
+const updateSauce = (req, res, next) => {
+  let validInput = true;
+
   //verify if file exists
   const sauceObject = req.file
     ? {
@@ -88,12 +87,51 @@ const modifySauce = (req, res, next) => {
     : //if image doesn't change, it gets new inputs informations
       { ...req.body };
 
-  Sauce.updateOne(
-    { _id: req.params.id },
-    { ...sauceObject, _id: req.params.id }
-  )
-    .then(() => res.status(200).json({ message: "Sauce modifiée" }))
-    .catch((err) => res.status(400).json({ err }));
+  const sauceArray = Object.values(sauceObject);
+    /**
+   *  loop checks if inputs are valid before creating the sauce
+   *  you'll have to comment this loop if you want to test this function on postman otherwise
+   *  it will return you an error because of the empty fields
+   */
+  for (value in sauceArray) {
+    if (
+      validator.isEmpty(sauceArray[value].toString(), {
+        ignore_whitespace: true,
+      }) ||
+      validator.contains(sauceArray[value].toString(), "$") ||
+      validator.contains(sauceArray[value].toString(), "=")
+    ) {
+      console.log("Vérifer le champ: " + sauceArray[value]);
+      validInput = false;
+    }
+  }
+
+  //delete previous image if a new image is uploaded
+  if (req.file && validInput) {
+    Sauce.findOne({ _id: req.params.id })
+      .then((sauce) => {
+        const filename = sauce.imageUrl.split("/images/")[1];
+        fs.unlink(`images/${filename}`, (err) => {
+          if (err) throw err;
+        });
+      })
+      .catch((error) => res.status(400).json({ error }));
+  }
+
+  if(!validInput){
+    fs.unlink(path.join(`${req.file.path}`), (err) => console.log(err));
+    res
+      .status(400)
+      .json({ error: "Veuillez vérifier la validité de vos champs de texte" });
+      return
+  }
+
+    Sauce.updateOne(
+      { _id: req.params.id },
+      { ...sauceObject, _id: req.params.id }
+    )
+      .then(() => res.status(200).json({ message: "Sauce modifiée" }))
+      .catch((err) => res.status(400).json({ err }));
 };
 
 //function deletes one sauce
@@ -133,10 +171,13 @@ const likeDislikeSauce = (req, res, next) => {
               }
             )
               .then(() =>
-                res.status(201).json({ message: `Vous aimé cette sauce` })
+                res.status(201).json({
+                  message: `Vous aimé cette sauce`,
+                })
               )
               .catch((err) => res.status(400).json({ err }));
           }
+          console.log(req.body.like);
           break;
         //user cancels like/dislike
         case 0:
@@ -170,6 +211,8 @@ const likeDislikeSauce = (req, res, next) => {
               )
               .catch((err) => res.status(400).json({ err }));
           }
+          console.log(req.body.like);
+
           break;
         //user dislikes sauce
         case -1:
@@ -193,6 +236,8 @@ const likeDislikeSauce = (req, res, next) => {
               )
               .catch((err) => res.status(400).json({ err }));
           }
+          console.log(req.body.like);
+
           break;
 
         default:
@@ -205,8 +250,8 @@ const likeDislikeSauce = (req, res, next) => {
 module.exports = {
   addSauce,
   getSauce,
-  getOneSauce,
-  modifySauce,
+  getSauceById,
+  updateSauce,
   deleteSauce,
   likeDislikeSauce,
 };

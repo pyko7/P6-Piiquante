@@ -18,7 +18,7 @@ Piiquante is a web app where users can share and like or dislike their favourite
 
 ### The project
 
-For this project, the objective is to build the API.  integrate a mockup of a mobile-first website where gourmet restaurant from Paris can list their menus. On top of that, the user can select which meal he'd like to eat.
+For this project, the objective is to build the API with NodeJS and ExpressJS.
 
 
 ### Installation
